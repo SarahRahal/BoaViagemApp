@@ -18,6 +18,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,31 +34,24 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.boaviagemsarah.viewmodels.DadosViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun telaLogin(onCadUsuario: ()->Unit, onLogin: () ->Unit){
-
-    var visibi = remember {
-        mutableStateOf(false)
-    }
+fun telaLogin(
+    onCadUsuario: ()->Unit,
+    onLogin: () ->Unit,
+    dadosViewModel: DadosViewModel = viewModel()
+){
 
     val snackbarHostState = remember {
         SnackbarHostState()
     }
 
-    var login = remember {
-        mutableStateOf("")
-    }
-
-    var pass = remember {
-        mutableStateOf("")
-    }
-
     var coroutineScope = rememberCoroutineScope()
 
     val focus = LocalFocusManager.current
-
 
     Scaffold(
         snackbarHost = {
@@ -71,6 +65,11 @@ fun telaLogin(onCadUsuario: ()->Unit, onLogin: () ->Unit){
                 .background(Color.LightGray)
 
         ) {
+
+            val loginState = dadosViewModel.uiState.collectAsState()
+            val passState = dadosViewModel.uiState.collectAsState()
+            val visivelState = dadosViewModel.uiState.collectAsState()
+
             Image(
                 painter = painterResource(id = com.example.boaviagemsarah.R.drawable.camera),
                 contentDescription = "Camera",
@@ -91,8 +90,11 @@ fun telaLogin(onCadUsuario: ()->Unit, onLogin: () ->Unit){
             )
 
             OutlinedTextField(
-                value = login.value,
-                onValueChange = { login.value = it },
+                value = loginState.value.login,
+                onValueChange = { dadosViewModel.updateLogin(it) },
+                label = {
+                    Text(text = "Login")
+                },
                 modifier = Modifier
                     .padding(top = 15.dp)
                     .fillMaxWidth()
@@ -109,22 +111,25 @@ fun telaLogin(onCadUsuario: ()->Unit, onLogin: () ->Unit){
             )
 
             OutlinedTextField(
-                value = pass.value,
-                onValueChange = { pass.value = it },
+                value = passState.value.senha,
+                onValueChange = { dadosViewModel.updateSenha(it) },
+                label = {
+                    Text(text = "Password")
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password
                 ),
                 visualTransformation =
-                if (visibi.value)
+                if (visivelState.value.visivel)
                     VisualTransformation.None
                 else
                     PasswordVisualTransformation(),
 
                 trailingIcon = {
                     IconButton(onClick = {
-                        visibi.value = !visibi.value
+                        dadosViewModel.updadeVisivel(!visivelState.value.visivel)
                     }) {
-                        if (visibi.value)
+                        if (visivelState.value.visivel)
                             Icon(
                                 painterResource(id = com.example.boaviagemsarah.R.drawable.visible), ""
                             )
@@ -141,7 +146,7 @@ fun telaLogin(onCadUsuario: ()->Unit, onLogin: () ->Unit){
 
             Button(
                 onClick = {
-                    if (pass.value == "admin" && login.value == "admin")
+                    if (passState.value.senha == "admin" && loginState.value.login == "admin")
                         onLogin()
                     else {
                         coroutineScope.launch {
