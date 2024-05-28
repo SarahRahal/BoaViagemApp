@@ -20,26 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun cadUsuario(onBack: () -> Unit) {//retorno do botao para voltar a main
+fun cadUsuario(
 
-    val login = remember {
-        mutableStateOf("")
-    }
+    onBack: () -> Unit,
+    dadosViewModel: DadosViewModel = viewModel()
 
-    val senha = remember {
-        mutableStateOf("")
-    }
-
-    val email = remember {
-        mutableStateOf("")
-    }
+) {//retorno do botao para voltar a main
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray)
 
     ) {
+
+        val loginState = dadosViewModel.uiState.collectAsState()
+        val passState = dadosViewModel.uiState.collectAsState()
+        val emailState = dadosViewModel.uiState.collectAsState()
 
         Row {
             Text(
@@ -69,8 +65,8 @@ fun cadUsuario(onBack: () -> Unit) {//retorno do botao para voltar a main
         ) {
 
             OutlinedTextField(
-                value = login.value,
-                onValueChange = {login.value = it},
+                value = loginState.value.login,
+                onValueChange = {dadosViewModel.updateLogin(it)},
                 modifier = Modifier
                     .padding(start = 55.dp, top = 10.dp)
             )
@@ -93,8 +89,8 @@ fun cadUsuario(onBack: () -> Unit) {//retorno do botao para voltar a main
 
         ) {
             OutlinedTextField(
-                value = senha.value,
-                onValueChange = {senha.value = it},
+                value = passState.value.senha,
+                onValueChange = {dadosViewModel.updateSenha(it)},
                 modifier = Modifier
                     .padding(start = 55.dp, top = 10.dp)
             )
@@ -116,8 +112,8 @@ fun cadUsuario(onBack: () -> Unit) {//retorno do botao para voltar a main
 
         ) {
             OutlinedTextField(
-                value = email.value,
-                onValueChange = {email.value = it},
+                value = emailState.value.email,
+                onValueChange = {dadosViewModel.updateEmail(it)},
                 modifier = Modifier
                     .padding(start = 55.dp, top = 10.dp)
             )
@@ -140,10 +136,4 @@ fun cadUsuario(onBack: () -> Unit) {//retorno do botao para voltar a main
         }
 
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewAbout() {
-    cadUsuario({})
 }

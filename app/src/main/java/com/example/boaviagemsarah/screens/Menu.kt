@@ -26,26 +26,7 @@ fun Menu(onBack: () ->Unit){
 
     ){
 
-        Row {
-            Button(
-                onClick = { onBack() },
-                modifier = Modifier
-                    .padding(start = 312.dp, top = 5.dp)
 
-            ) {
-                Text(text = "Sair")
-            }
-        }
-
-        Row {
-            Text(
-                text = "Menu do Sistema",
-                fontSize = 26.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 15.dp)
-            )
         }
 
 
