@@ -12,6 +12,6 @@ fun Sobre(){
         modifier = Modifier
 
     ){
-        Text(text = "Sobre o Desenvolvedor")
+        Text(text = "Olá meu nome Sarah! Estou feliz em estar finalizando o curso ADS.")
     }
 }

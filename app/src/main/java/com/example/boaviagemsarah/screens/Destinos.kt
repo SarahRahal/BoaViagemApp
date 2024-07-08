@@ -2,8 +2,10 @@ package com.example.boaviagemsarah.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,15 +39,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.boaviagemsarah.R
 import com.example.boaviagemsarah.dataBase.AppDataBase
 import com.example.boaviagemsarah.models.Destino
 import com.example.boaviagemsarah.viewmodels.DestinoViewModel
 import com.example.boaviagemsarah.viewmodels.DestinoViewModelFactory
 
 fun dest(){
-
 }
-
 @Composable
 fun Destinos() {
 
@@ -64,12 +65,8 @@ fun Destinos() {
                 onClick = {
 
                     navController.navigate("viagem/${-1L}")
-
-//                    Toast.makeText(
-//                        ctx, "novo",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-                }) {
+              })
+            {
                 Icon(
                     imageVector = Icons.Default.AddCircle,
                     contentDescription = ""
@@ -86,11 +83,13 @@ fun Destinos() {
                 navController = navController,
                 startDestination = "dest"
             ) {
-                composable("viagem/{destinoId}", arguments = listOf(navArgument("destinoId"){
-                    type = NavType.LongType ; defaultValue = -1L})) { entry ->
-                    entry.arguments?.getLong("destinoId").let { it
+                composable("viagem/{destinoId}", arguments = listOf(navArgument("destinoId") {
+                    type = NavType.LongType; defaultValue = -1L
+                })) { entry ->
+                    entry.arguments?.getLong("destinoId").let {
+                        it
                         Viagens(
-                            onBack = {navController.navigateUp()}, it
+                            onBack = { navController.navigateUp() }, it
                         )
                     }
                 }
@@ -102,19 +101,24 @@ fun Destinos() {
             }
 
             LazyColumn {
-                items(items = list) {
-                    DestinoCard(p = it)
+                items(items = destinosLista.value) {
+                    DestinoCard(
+                        p = it,
+                        onDelete = {
+                            destinoViewModel.delet(it)
+                        },
+                        onEdit = {
+                            navController.navigate("viagem/${it.id}")
+                        }
+                    )
                 }
             }
-
-
         }
     }
-
 }
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DestinoCard(p: Destino) {
+fun DestinoCard(p: Destino, onDelete: () -> Unit, onEdit: () -> Unit) {
     val ctx = LocalContext.current
     Card(elevation = CardDefaults.cardElevation(
         defaultElevation = 8.dp
@@ -123,43 +127,39 @@ fun DestinoCard(p: Destino) {
         modifier = Modifier
             .padding(4.dp)
             .fillMaxSize()
-            .clickable {
-                Toast
-                    .makeText(
-                        ctx, "Destino: ${p.destino}",
-                        Toast.LENGTH_SHORT
-                    )
-                    .show()
-            }
+            .combinedClickable(
+                onClick = {
+                    onEdit()
+                },
+                onLongClick = {
+                    onDelete()
+                }
+            )
+
     ) {
         Column(modifier = Modifier.padding(4.dp)) {
-
             Row {
-
                 if (p.finalidade == "lazer") {
                     Image(
-                        painter = painterResource(id = com.example.boaviagemsarah.R.drawable.lazer),
+                        painter = painterResource(id = R.drawable.lazer),
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(55.dp)
                             .weight(0.8f)
                             .padding(top = 8.dp, end = 10.dp)
-                            .clip(CircleShape)
                     )
                 } else {
                     Image(
-                        painter = painterResource(id = com.example.boaviagemsarah.R.drawable.trabalho),
+                        painter = painterResource(id = R.drawable.trabalho),
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(55.dp)
                             .weight(0.8f)
                             .padding(top = 8.dp, end = 10.dp)
-                            .clip(CircleShape)
                     )
                 }
-
                 Column(
                     modifier = Modifier
                         .weight(3f)
@@ -171,14 +171,12 @@ fun DestinoCard(p: Destino) {
                             fontSize = 22.sp
                         )
                     }
-
                     Row {
                         Text(
                             text = "Inicio ${p.inicio} - Fim ${p.fim}",
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
-
                     Row {
                         Text(
                             text = "Orçamento R$${p.valor}",

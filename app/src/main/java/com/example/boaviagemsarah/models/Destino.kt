@@ -7,11 +7,11 @@ import androidx.room.PrimaryKey
 
 data class Destino (
 
-    @PrimaryKey (autoGenerate = true) val id: Int=0,
+    @PrimaryKey (autoGenerate = true) val id: Long=0,
     val destino: String = "",
     val inicio: String = "",
     val fim: String = "",
-    val valor: Double,
+    val valor: Double = 0.0,
     val finalidade : String = ""
 ){//data = não preciso escrever os getters e setters
 }

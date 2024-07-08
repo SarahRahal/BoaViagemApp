@@ -36,238 +36,237 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+@SuppressLint("CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Viagens(){
-    @SuppressLint("CoroutineCreationDuringComposition")
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun Viagens(onBack: ()->Unit, id : Long?) {
-        Scaffold(
-            topBar = {
-                MyTopBar("Nova Viagem") { onBack() }
+fun Viagens(onBack: () -> Unit, id: Long?) {
+    Scaffold(
+        topBar = {
+            MyTopBar("Nova Viagem") { onBack() }
+        }
+    ) { it ->
+        val destinoViewModel: DestinoViewModel = viewModel(
+            factory = DestinoViewModelFactory(AppDataBase.getDatabase(LocalContext.current))
+        )
+        LaunchedEffect(id) {
+            if (id != null) {
+                val viagem = destinoViewModel.findById(id)
+                viagem?.let { destinoViewModel.setUiState(it) }
             }
-        ) { it ->
-            val destinoViewModel: DestinoViewModel = viewModel(
-                factory = DestinoViewModelFactory(AppDataBase.getDatabase(LocalContext.current))
-            )
-            LaunchedEffect(id) {
-                if (id != null){
-                    val viagem = destinoViewModel.findById(id)
-                    viagem?.let { destinoViewModel.setUiState(it) }
-                }
-            }
-            val state = destinoViewModel.uiState.collectAsState()
+        }
+        val state = destinoViewModel.uiState.collectAsState()
 
-            val showDatePickerDialogInicio = remember {
-                mutableStateOf(false)
-            }
-            val datePickerStateInicio = rememberDatePickerState()
-            val showDatePickerDialogFinal = remember {
-                mutableStateOf(false)
-            }
-            val datePickerStateFinal = rememberDatePickerState()
-            Column(
-                modifier = Modifier
-                    .padding(it)
-                    .padding(16.dp)
+        val showDatePickerDialogInicio = remember {
+            mutableStateOf(false)
+        }
+        val datePickerStateInicio = rememberDatePickerState()
+        val showDatePickerDialogFinal = remember {
+            mutableStateOf(false)
+        }
+        val datePickerStateFinal = rememberDatePickerState()
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Destino",
-                        fontSize = 22.sp,
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                }
-                Row {
-                    OutlinedTextField(
-                        value = state.value.destino,
-                        onValueChange = {destinoViewModel.updateDestino(it)},
-                        modifier = Modifier
-                            .weight(4f)
-                            .padding(top = 10.dp)
-                    )
-                }
-                Row {
-                    Text(
-                        text = "Tipo",
-                        fontSize = 22.sp,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp)
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = state.value.finalidade == "lazer", // it.value.tipo == "lazer"
-                        onClick = {destinoViewModel.updadeFinalidade("lazer")}, /// vm.updateFinalidade("lazer")
-                        modifier = Modifier
-                            .weight(0.5f)
-                    )
-                    Text(
-                        text = "Lazer",
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .weight(1.5f)
-                    )
-                    RadioButton(
-                        selected = state.value.finalidade == "negocio",
-                        onClick = {destinoViewModel.updadeFinalidade("negocio")},
-                        modifier = Modifier
-                            .weight(0.5f)
-                    )
-                    Text(
-                        text = "Negócios",
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .weight(1.5f)
-                    )
-                }
-                Row {
-                    Text(
-                        text = "Data Inicio",
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .weight(1.5f)
-                            .padding(top = 16.dp)
-                    )
-                }
-                Row {
-                    if (showDatePickerDialogInicio.value) {
-                        DatePickerDialog(
-                            onDismissRequest = { showDatePickerDialogInicio.value = false },
-                            confirmButton = {
-                                Button(
-                                    onClick = {
-                                        datePickerStateInicio
-                                            .selectedDateMillis?.let { millis ->
-                                                destinoViewModel.updateInicio(millis.toBrazilianDateFormat())
-                                            }
-                                        showDatePickerDialogInicio.value = false
-                                    }) {
-                                    Text(text = "Escolher data")
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(4f)
-                        ) {
-                            DatePicker(state = datePickerStateInicio)
-                        }
-                    }
-                    OutlinedTextField(
-                        value = state.value.inicio,
-                        onValueChange = {destinoViewModel.updateInicio(it)},
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    showDatePickerDialogInicio.value = true
-                                }
-                            },
-                        readOnly = true
-                    )
-                }
-                Row {
-                    Text(
-                        text = "Data Final",
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .weight(1.5f)
-                            .padding(top = 16.dp)
-                    )
-                }
-                Row {
-                    if (showDatePickerDialogFinal.value) {
-                        DatePickerDialog(
-                            onDismissRequest = { showDatePickerDialogFinal.value = false },
-                            confirmButton = {
-                                Button(
-                                    onClick = {
-                                        datePickerStateFinal
-                                            .selectedDateMillis?.let { millis ->
-                                                destinoViewModel.updadeFim(millis.toBrazilianDateFormat())
-                                            }
-                                        showDatePickerDialogFinal.value = false
-                                    }) {
-                                    Text(text = "Escolher data")
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(4f)
-                        ) {
-                            DatePicker(state = datePickerStateFinal)
-                        }
-                    }
-                    OutlinedTextField(
-                        value = state.value.fim,
-                        onValueChange = {destinoViewModel.updadeFim(it)},
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    showDatePickerDialogFinal.value = true
-                                }
-                            },
-                        readOnly = true
-                    )
-                }
-                Row {
-                    Text(
-                        text = "Orçamento",
-                        fontSize = 22.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .weight(1.5f)
-                            .padding(top = 16.dp)
-                    )
-                }
-                Row {
-                    OutlinedTextField(
-                        value = state.value.valor.toString(),
-                        onValueChange = {destinoViewModel.updateValor(it.toDouble())},
-                        modifier = Modifier
-                            .weight(4f)
-                            .padding(top = 10.dp)
-                    )
-                }
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Button(
-                        onClick = {
-                            destinoViewModel.save()
-                            onBack()
+                Text(
+                    text = "Destino",
+                    fontSize = 22.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                )
+            }
+            Row {
+                OutlinedTextField(
+                    value = state.value.destino,
+                    onValueChange = { destinoViewModel.updateDestino(it) },
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                )
+            }
+            Row {
+                Text(
+                    text = "Tipo",
+                    fontSize = 22.sp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 10.dp)
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = state.value.finalidade == "lazer", // it.value.tipo == "lazer"
+                    onClick = { destinoViewModel.updadeFinalidade("lazer") }, /// vm.updateFinalidade("lazer")
+                    modifier = Modifier
+                        .weight(0.5f)
+                )
+                Text(
+                    text = "Lazer",
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .weight(1.5f)
+                )
+                RadioButton(
+                    selected = state.value.finalidade == "negocio",
+                    onClick = { destinoViewModel.updadeFinalidade("negocio") },
+                    modifier = Modifier
+                        .weight(0.5f)
+                )
+                Text(
+                    text = "Negócios",
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .weight(1.5f)
+                )
+            }
+            Row {
+                Text(
+                    text = "Data Inicio",
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .padding(top = 16.dp)
+                )
+            }
+            Row {
+                if (showDatePickerDialogInicio.value) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePickerDialogInicio.value = false },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    datePickerStateInicio
+                                        .selectedDateMillis?.let { millis ->
+                                            destinoViewModel.updateInicio(millis.toBrazilianDateFormat())
+                                        }
+                                    showDatePickerDialogInicio.value = false
+                                }) {
+                                Text(text = "Escolher data")
+                            }
                         },
                         modifier = Modifier
-                            .padding(top = 35.dp)
-                            .weight(2f)
-                    ){
-                        Text(text = "Salvar")
+                            .weight(4f)
+                    ) {
+                        DatePicker(state = datePickerStateInicio)
                     }
                 }
+                OutlinedTextField(
+                    value = state.value.inicio,
+                    onValueChange = { destinoViewModel.updateInicio(it) },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                showDatePickerDialogInicio.value = true
+                            }
+                        },
+                    readOnly = true
+                )
             }
-
-            fun Long.toBrazilianDateFormat(
-                pattern: String = "dd/MM/yyyy"
-            ): String {
-                val date = Date(this)
-                val formatter = SimpleDateFormat(
-                    pattern, Locale("pt-br")
-                ).apply {
-                    timeZone = TimeZone.getTimeZone("GMT")
+            Row {
+                Text(
+                    text = "Data Final",
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .padding(top = 16.dp)
+                )
+            }
+            Row {
+                if (showDatePickerDialogFinal.value) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePickerDialogFinal.value = false },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    datePickerStateFinal
+                                        .selectedDateMillis?.let { millis ->
+                                            destinoViewModel.updadeFim(millis.toBrazilianDateFormat())
+                                        }
+                                    showDatePickerDialogFinal.value = false
+                                }) {
+                                Text(text = "Escolher data")
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(4f)
+                    ) {
+                        DatePicker(state = datePickerStateFinal)
+                    }
                 }
-                return formatter.format(date)
+                OutlinedTextField(
+                    value = state.value.fim,
+                    onValueChange = { destinoViewModel.updadeFim(it) },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                showDatePickerDialogFinal.value = true
+                            }
+                        },
+                    readOnly = true
+                )
+            }
+            Row {
+                Text(
+                    text = "Orçamento",
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .padding(top = 16.dp)
+                )
+            }
+            Row {
+                OutlinedTextField(
+                    value = state.value.valor.toString(),
+                    onValueChange = { destinoViewModel.updateValor(it.toDouble()) },
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        destinoViewModel.save()
+                        onBack()
+                    },
+                    modifier = Modifier
+                        .padding(top = 35.dp)
+                        .weight(2f)
+                ) {
+                    Text(text = "Salvar")
+                }
             }
         }
     }
 }
+
+fun Long.toBrazilianDateFormat(
+    pattern: String = "dd/MM/yyyy"
+): String {
+    val date = Date(this)
+    val formatter = SimpleDateFormat(
+        pattern, Locale("pt-br")
+    ).apply {
+        timeZone = TimeZone.getTimeZone("GMT")
+    }
+    return formatter.format(date)
+}
+
+

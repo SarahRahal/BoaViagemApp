@@ -14,13 +14,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class DestinoViewModelFactory(val db : AppDataBase) : ViewModelProvider.Factory{//tem que criar para usar o db
+class DestinoViewModelFactory(val db : AppDataBase) : ViewModelProvider.Factory{
 override fun <T : ViewModel> create(modelClass: Class<T>): T {
     return DestinoViewModel(db.destinoDao) as T
 }
 }
-class DestinoViewModel(val destinoDao: DestinoDao) : ViewModel(){
+class DestinoViewModel(val destinoDao: DestinoDao): ViewModel(){
+
     private val _uiState = MutableStateFlow(Destino())
+
     val uiState : StateFlow<Destino> = _uiState.asStateFlow()
     fun updateDestino(newDestino : String){
         _uiState.update { it.copy(destino = newDestino) }
