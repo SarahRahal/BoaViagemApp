@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.R
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,15 +36,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.boaviagemsarah.dataBase.AppDataBase
 import com.example.boaviagemsarah.viewmodels.DadosViewModel
+import com.example.boaviagemsarah.viewmodels.DadosViewModelFactory
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun telaLogin(
     onCadUsuario: ()->Unit,
-    onLogin: () ->Unit,
-    dadosViewModel: DadosViewModel = viewModel()
-){
+    onLogin: (pass:String) ->Unit,
+    ){
+    val db = AppDataBase.getDatabase(LocalContext.current)
+    val dadosViewModel: DadosViewModel = viewModel(
+        factory = DadosViewModelFactory(db)
+    )
 
     val snackbarHostState = remember {
         SnackbarHostState()
@@ -146,15 +153,21 @@ fun telaLogin(
 
             Button(
                 onClick = {
-                    if (passState.value.senha == "admin" && loginState.value.login == "admin")
-                        onLogin()
-                    else {
-                        coroutineScope.launch {
-                            focus.clearFocus()
-                            snackbarHostState.showSnackbar(
-                                message = "login ou Senha errados",
-                                withDismissAction = true
-                            )
+                    MainScope().launch {
+                        val pass = dadosViewModel.findByLogin(
+                            dadosViewModel.uiState.value.login,
+                            dadosViewModel.uiState.value.senha
+                        )
+                        if (pass != null) {
+                            onLogin(pass.toString())
+                        } else {
+                            coroutineScope.launch {
+                                focus.clearFocus()
+                                snackbarHostState.showSnackbar(
+                                    message = "login ou Senha errados",
+                                    withDismissAction = true
+                                )
+                            }
                         }
                     }
                 },

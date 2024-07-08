@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,10 +31,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.boaviagemsarah.dataBase.AppDataBase
 import com.example.boaviagemsarah.models.Destino
+import com.example.boaviagemsarah.viewmodels.DestinoViewModel
+import com.example.boaviagemsarah.viewmodels.DestinoViewModelFactory
 
 fun dest(){
 
@@ -42,12 +49,11 @@ fun dest(){
 @Composable
 fun Destinos() {
 
-
-    val list = listOf(
-        Destino(1, "Egito", "12/12/2022", "05/01/2023", 12585.50, "lazer"),
-        Destino(2, "França", "08/12/2021", "02/01/2022", 45398.45, "trabalho"),
-        Destino(3, "Suiça", "18/12/2020", "03/01/2021", 65524.25, "lazer")
+    val destinoViewModel: DestinoViewModel = viewModel(
+        factory = DestinoViewModelFactory(AppDataBase.getDatabase(LocalContext.current))
     )
+
+    val destinosLista = destinoViewModel.getAll().collectAsState(initial = emptyList())
 
     val navController = rememberNavController()
 
@@ -57,7 +63,7 @@ fun Destinos() {
             FloatingActionButton(
                 onClick = {
 
-                    navController.navigate("viagem")
+                    navController.navigate("viagem/${-1L}")
 
 //                    Toast.makeText(
 //                        ctx, "novo",
@@ -80,10 +86,13 @@ fun Destinos() {
                 navController = navController,
                 startDestination = "dest"
             ) {
-                composable("viagem") {
-                    Viagens(
-                        onBack = {navController.navigateUp()}
-                    )
+                composable("viagem/{destinoId}", arguments = listOf(navArgument("destinoId"){
+                    type = NavType.LongType ; defaultValue = -1L})) { entry ->
+                    entry.arguments?.getLong("destinoId").let { it
+                        Viagens(
+                            onBack = {navController.navigateUp()}, it
+                        )
+                    }
                 }
 
                 composable("dest") {

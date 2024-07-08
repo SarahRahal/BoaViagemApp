@@ -15,20 +15,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.boaviagemsarah.dataBase.AppDataBase
 import com.example.boaviagemsarah.viewmodels.DadosViewModel
+import com.example.boaviagemsarah.viewmodels.DadosViewModelFactory
 
 @Composable
 fun cadUsuario(
 
     onBack: () -> Unit,
-    dadosViewModel: DadosViewModel = viewModel()
+ ) {
 
-) {//retorno do botao para voltar a main
+    val dadosViewModel: DadosViewModel = viewModel(
+        factory = DadosViewModelFactory(AppDataBase.getDatabase(LocalContext.current))
+    )
 
     Column(
         modifier = Modifier
@@ -61,7 +66,6 @@ fun cadUsuario(
                     .fillMaxWidth()
             )
         }
-
 
         Row(
 
@@ -125,7 +129,9 @@ fun cadUsuario(
 
         Row {
             Button(
-                onClick = { onBack() },
+                onClick = {
+                    dadosViewModel.saveNew()
+                    onBack() },
                 modifier = Modifier
                     .padding(start = 127.dp, top = 25.dp)
 

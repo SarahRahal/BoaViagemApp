@@ -1,7 +1,13 @@
 package com.example.boaviagemsarah.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+
 data class Destino (
-    val id: Int=0,
+
+    @PrimaryKey (autoGenerate = true) val id: Int=0,
     val destino: String = "",
     val inicio: String = "",
     val fim: String = "",
