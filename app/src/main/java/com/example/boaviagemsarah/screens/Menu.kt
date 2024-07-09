@@ -100,8 +100,8 @@ fun Menu(ida: String){
                 )
 
                 BottomNavigationItem(
-                    selected = isSelected(currentDestination, "viagem"),
-                    onClick = { navController.navigate("viagem") },
+                    selected = isSelected(currentDestination, "destino"),
+                    onClick = { navController.navigate("destino") },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Person,
